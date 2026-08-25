@@ -138,6 +138,7 @@ class PonoOptions
         printing_smt_solver_(default_printing_smt_solver_),
         printing_smt_interpolator_(default_printing_smt_interpolator_),
         static_coi_(default_static_coi_),
+        compute_dynamic_coi_upon_cex_(default_compute_dynamic_coi_upon_cex_),
         show_invar_(default_show_invar_),
         check_invar_(default_check_invar_),
         check_trans_total_(default_check_trans_total_),
@@ -252,6 +253,7 @@ class PonoOptions
   bool printing_smt_solver_;
   bool printing_smt_interpolator_;
   bool static_coi_;
+  bool compute_dynamic_coi_upon_cex_;
   bool show_invar_;   ///< display invariant when running from command line
   bool check_invar_;  ///< check invariants (if available) when run through CLI
   bool check_trans_total_;  ///< check if transition relation is right-total
@@ -412,6 +414,7 @@ class PonoOptions
   static const bool default_logging_smt_solver_ = false;
   static const bool default_printing_smt_solver_ = false;
   static const bool default_printing_smt_interpolator_ = false;
+  static const bool default_compute_dynamic_coi_upon_cex_ = false;
   static const bool default_ic3_pregen_ = true;
   static const bool default_ic3_indgen_ = true;
   static const unsigned int default_ic3_gen_max_iter_ = 2;

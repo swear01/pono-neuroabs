@@ -50,6 +50,7 @@ enum optionIndex
   JUSTICE,
   JUSTICE_TRANSLATOR,
   STATICCOI,
+  DYNAMIC_COI_UP_CEX,
   SHOW_INVAR,
   CHECK_INVAR,
   CHECK_TRANS_TOTAL,
@@ -313,6 +314,13 @@ const option::Descriptor usage[] = {
     Arg::None,
     "  --static-coi \tApply static (i.e., one-time before solving) "
     "cone-of-influence analysis." },
+  { DYNAMIC_COI_UP_CEX,
+    0,
+    "",
+    "dynamic_coi_up_cex",
+    Arg::None,
+    "  --dynamic_coi_up_cex \tWrite a model-guided dynamic cone of influence "
+    "for a counterexample to coi-check-rev.txt." },
   { SHOW_INVAR,
     0,
     "",
@@ -933,6 +941,7 @@ ProverResult PonoOptions::parse_and_set_options(int argc,
           justice_translator_ = to_justice_translator(opt.arg);
           break;
         case STATICCOI: static_coi_ = true; break;
+        case DYNAMIC_COI_UP_CEX: compute_dynamic_coi_upon_cex_ = true; break;
         case SHOW_INVAR: show_invar_ = true; break;
         case CHECK_INVAR: check_invar_ = true; break;
         case CHECK_TRANS_TOTAL: check_trans_total_ = true; break;

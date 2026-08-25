@@ -136,6 +136,8 @@ class SafetyProver : public BaseProver
    */
   virtual bool compute_witness();
 
+  void write_dynamic_coi();
+
   SafetyProperty orig_property_;  ///< original property before transferring
 
   Unroller unroller_;

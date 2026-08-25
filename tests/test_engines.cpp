@@ -1,3 +1,6 @@
+#include <cstdio>
+#include <fstream>
+#include <sstream>
 #include <tuple>
 #include <vector>
 
@@ -81,6 +84,39 @@ TEST_P(EngineTest, BmcFalse)
   ASSERT_EQ(r, ProverResult::FALSE);
   std::vector<UnorderedTermMap> cex;
   ASSERT_TRUE(b.witness(cex));
+}
+
+TEST(DynamicCoiTest, ExcludesUnselectedIteBranch)
+{
+  const char * coi_file = "coi-check-rev.txt";
+  std::remove(coi_file);
+
+  SmtSolver s = create_solver(BZLA);
+  FunctionalTransitionSystem ts(s);
+  Sort boolsort = ts.make_sort(BOOL);
+  Sort bvsort1 = ts.make_sort(BV, 1);
+  Term selector = ts.make_statevar("selector", boolsort);
+  Term value = ts.make_statevar("value", bvsort1);
+  Term input0 = ts.make_inputvar("input0", bvsort1);
+  Term input1 = ts.make_inputvar("input1", bvsort1);
+  Term zero = ts.make_term(0, bvsort1);
+
+  ts.set_init(ts.make_term(And, selector, ts.make_term(Equal, value, zero)));
+  ts.assign_next(selector, selector);
+  ts.assign_next(value, ts.make_term(Ite, selector, input0, input1));
+
+  SafetyProperty property(s, ts.make_term(Equal, value, zero));
+  PonoOptions options;
+  options.compute_dynamic_coi_upon_cex_ = true;
+  Bmc bmc(property, ts, s, options);
+  ASSERT_EQ(bmc.check_until(1), ProverResult::FALSE);
+
+  std::ifstream input(coi_file);
+  std::stringstream contents;
+  contents << input.rdbuf();
+  EXPECT_NE(contents.str().find("input0@0"), std::string::npos);
+  EXPECT_EQ(contents.str().find("input1@0"), std::string::npos);
+  std::remove(coi_file);
 }
 
 TEST_P(EngineTest, BmcSimplePathTrue)
