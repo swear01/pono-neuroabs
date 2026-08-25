@@ -65,6 +65,21 @@ You can pull the image with:
 docker pull ghcr.io/stanford-centaur/pono:latest
 ```
 
+### NeuroAbs dynamic COI
+
+`--dynamic_coi_up_cex` writes `coi-check-rev.txt` after a safety
+counterexample. Each line contains a frame number and timed variable selected
+by a model-guided, word-level backward slice. The format is consumed directly
+by NeuroAbs:
+
+```bash
+./build/pono --bound 25 --promote-inputvars --dynamic_coi_up_cex model.btor2
+```
+
+The output is written in the current working directory. This implementation
+reuses Pono's `PartialModelGen`; unlike the historical NeuroAbs artifact, it
+does not perform bit-slice reduction.
+
 ### Profiling
 
 We link against the [gperftools library](https://github.com/gperftools/gperftools)

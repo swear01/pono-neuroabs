@@ -21,6 +21,7 @@
 #include <climits>
 #include <cstddef>
 #include <exception>
+#include <fstream>
 #include <functional>
 #include <vector>
 
@@ -28,6 +29,7 @@
 #include "options/options.h"
 #include "smt-switch/smt.h"
 #include "utils/exceptions.h"
+#include "utils/partial_model.h"
 
 using namespace smt;
 using namespace std;
@@ -223,6 +225,10 @@ bool SafetyProver::compute_witness()
 {
   // TODO: make sure the solver state is SAT
 
+  if (options_.compute_dynamic_coi_upon_cex_) {
+    write_dynamic_coi();
+  }
+
   for (size_t i = 0, wl = witness_length(); i <= wl; ++i) {
     witness_.push_back(UnorderedTermMap());
     UnorderedTermMap & map = witness_.back();
@@ -246,6 +252,49 @@ bool SafetyProver::compute_witness()
   }
 
   return true;
+}
+
+void SafetyProver::write_dynamic_coi()
+{
+  ofstream output("coi-check-rev.txt");
+  if (!output) {
+    throw PonoException("Failed to open coi-check-rev.txt for writing");
+  }
+
+  PartialModelGen partial_model(solver_);
+  UnorderedTermSet variables;
+  partial_model.GetVarList(unroller_.at_time(bad_, witness_length()),
+                           variables);
+
+  for (int frame = static_cast<int>(witness_length()); frame >= 0; --frame) {
+    vector<Term> ordered(variables.begin(), variables.end());
+    sort(
+        ordered.begin(), ordered.end(), [](const Term & lhs, const Term & rhs) {
+          return lhs->to_string() < rhs->to_string();
+        });
+    for (const auto & variable : ordered) {
+      output << frame << " " << variable << "\n";
+    }
+
+    if (frame == 0) {
+      break;
+    }
+
+    TermVec dependencies;
+    for (const auto & variable : variables) {
+      Term untimed = unroller_.untime(variable);
+      auto update = ts_.state_updates().find(untimed);
+      if (ts_.is_curr_var(untimed) && update != ts_.state_updates().end()) {
+        dependencies.push_back(unroller_.at_time(update->second, frame - 1));
+      }
+    }
+    for (const auto & constraint : ts_.constraints()) {
+      dependencies.push_back(unroller_.at_time(constraint.first, frame - 1));
+    }
+
+    variables.clear();
+    partial_model.GetVarListForAsts(dependencies, variables);
+  }
 }
 
 LivenessProver::LivenessProver(const LivenessProperty & property,
