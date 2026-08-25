@@ -109,9 +109,10 @@ TEST(DynamicCoiTest, ExcludesUnselectedIteBranch)
   PonoOptions options;
   options.compute_dynamic_coi_upon_cex_ = true;
   Bmc bmc(property, ts, s, options);
-  ASSERT_EQ(bmc.check_until(1), ProverResult::FALSE);
+  EXPECT_EQ(bmc.check_until(1), ProverResult::FALSE);
 
   std::ifstream input(coi_file);
+  EXPECT_TRUE(input.is_open()) << "failed to open " << coi_file;
   std::stringstream contents;
   contents << input.rdbuf();
   EXPECT_NE(contents.str().find("input0@0"), std::string::npos);

@@ -136,6 +136,8 @@ class SafetyProver : public BaseProver
    */
   virtual bool compute_witness();
 
+  /** Write the NeuroAbs-compatible dynamic COI file in the current directory.
+   */
   void write_dynamic_coi();
 
   SafetyProperty orig_property_;  ///< original property before transferring
